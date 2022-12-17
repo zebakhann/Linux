@@ -38,7 +38,8 @@ Steps to setup iSCSI target (VM1) :
 
 1. Create the backing storage devices.
 
-Before we start working on our iSCSI target, we need a backend storage. On my node I have added an additional disk mapped to /dev/sdc. Below using fdisk I am creating a new partition /dev/sdc4 with 1GB size, which will be used to create my iSCSI target.
+Before we start working on our iSCSI target, we need a backend storage. On my node I have added an additional disk mapped to /dev/sdc. 
+Below using fdisk I am creating a new partition /dev/sdc4 with 1GB size, which will be used to create my iSCSI target.
 	#fdisk /dev/sdc
 	p   [checking existing partitions]
 	n   [creating a new partition]
@@ -57,7 +58,8 @@ To manage the kernel-based iSCSI Target service on RHEL/CentOS 7/8, we will need
 	
 3. Managing iSCSI targets with targetcli.
 
-The targetcli command is a shell to view, edit, save, and load the iSCSI target configuration. When you look at the configuration, you will see that targetcli provides a hierarchical structure in a similar way to a filesystem. 
+The targetcli command is a shell to view, edit, save, and load the iSCSI target configuration. 
+When you look at the configuration, you will see that targetcli provides a hierarchical structure in a similar way to a filesystem. 
 
 4. Create block backstores.	
 	#targetcli
@@ -96,12 +98,15 @@ The targetcli command is a shell to view, edit, save, and load the iSCSI target 
 
 Setting Up the iSCSI Initiator (Client VM) :
 
-The iSCSI Initiator or client on RHEL/CentOS 7/8 is installed with the iscsi-initiator-utils package; you can verify that this is installed on your system and if not then install it using yum.
+The iSCSI Initiator or client on RHEL/CentOS 7/8 is installed with the iscsi-initiator-utils package; 
+you can verify that this is installed on your system and if not then install it using yum.
 	#rpm -q iscsi-initiator-utils
 	o/p : iscsi-initiator-utils-6.2.0.874-19.el7.x86_64 [already installed]
 
 1. Setting the iSCSI Initiatorname.
-For the purpose of this task I'm using a different client vm  as our initiator and connect it to the existing target. We will need to edit the /etc/iscsi/initiatorname.iscsi file on the new RHEL 7 & 8 system to ensure that the name is set to match the name we added to the ACL in the earlier section of TARGET.
+For the purpose of this task I'm using a different client vm  as our initiator and connect it to the existing target. 
+We will need to edit the /etc/iscsi/initiatorname.iscsi file on the new RHEL 7 & 8 system to ensure that the name is set to match the 
+name we added to the ACL in the earlier section of TARGET.
 	#nano /etc/iscsi/initiatorname.iscsi
 	InitiatorName=iqn.1994-05.com.redhat:b1df3c869cc [comment this line]
 	InitiatorName=iqn.2022-12.com.example:node1  [add this in the config file]
@@ -112,7 +117,9 @@ For the purpose of this task I'm using a different client vm  as our initiator a
 When using iSCSI discovery, you need three different arguments:
 
     --type sendtargets: This tells the discovery mode how to find the iSCSI targets.
-    --portal: This argument tells the iscsiadm command which IP address and port to address to perform the discovery. You can use an IP address or node name as the argument, and optionally, you can specify a port as well. If no port is specified, the default port 3260 is used.
+    --portal: This argument tells the iscsiadm command which IP address and port to address to perform the discovery. 
+    You can use an IP address or node name as the argument, and optionally, you can specify a port as well. 
+    If no port is specified, the default port 3260 is used.
     --discover: This argument tells the iscsid service to perform a discovery.
 
 	#iscsiadm --mode discovery --type sendtargets --portal 172.16.207.132 --discover  [vm1 ip]
@@ -120,7 +127,8 @@ When using iSCSI discovery, you need three different arguments:
 	#ls -l /var/lib/iscsi/send_targets/172.16.207.132,3260/
 	
 3. Making the connection.
-Now, we have  connect to the iSCSI target and have it sent us the configured LUNS. We should now connect to this LUN and use the same command with the following options:
+Now, we have  connect to the iSCSI target and have it sent us the configured LUNS. 
+We should now connect to this LUN and use the same command with the following options:
 	#iscsiadm --mode node --targetname iqn.2022-12.com.example:servers  --login
 	
 In this command, a few options are used:
@@ -133,12 +141,16 @@ In this command, a few options are used:
 After logging in, a session with the iSCSI target is established. Both the session and the node connection can be monitored, using the -P option
 	#iscsiadm --mode node -P 1
 
-After making the connection to the iSCSI target, you’ll see the new SCSI devices as offered by the target. A convenient command to list these commands is lsscsi
+After making the connection to the iSCSI target, you’ll see the new SCSI devices as offered by the target. 
+A convenient command to list these commands is lsscsi
 	#lsscsi
 	o/p : [3:0:0:0]    disk    LIO-ORG  sdc4             4.0   /dev/sdb
 
 4. Managing iSCSI Connection Persistence.
-After logging in to an iSCSI target server, the connections are persistent automatically. That means that on reboot, the iscsid and iscsi services are started on the iSCSI client, and these services will read the iSCSI configuration that is locally stored to automatically reconnect. Therefore, there is no need to put anything in configuration files if you have successfully connected once to the iSCSI server.
+After logging in to an iSCSI target server, the connections are persistent automatically. 
+That means that on reboot, the iscsid and iscsi services are started on the iSCSI client, and these services will read the iSCSI 
+configuration that is locally stored to automatically reconnect. Therefore, there is no need to put anything in configuration 
+files if you have successfully connected once to the iSCSI server.
 
 5. Removing the iSCSI connection [ I didn't do this step]
 If you need an iSCSI connection not to be restored after reboot, you first have to log out to disconnect the actual session.
@@ -148,9 +160,13 @@ Next you need to delete the corresponding IQN sub directory and all of its conte
 	#iscsiadm --mode node --targetname iqn.2018-12.com.example:servers --portal <target ip of vm1> -o delete
 
 6. Mounting iSCSI Devices.
-To mount an iSCSI device, you need to take care of a few things. First, the iSCSI disk that now appears as /dev/sdc might appear as a different device name the next time it is connected due to a topology change in your SAN configuration. For that reason, it is not a smart idea to put a reference to /dev/sdc in the /etc/fstab file. You should instead use a file system UUID. Every file system automatically gets a UUID.
+To mount an iSCSI device, you need to take care of a few things. 
+First, the iSCSI disk that now appears as /dev/sdc might appear as a different device name the next time it is connected due to a 
+topology change in your SAN configuration. For that reason, it is not a smart idea to put a reference to /dev/sdc in the /etc/fstab file. 
+You should instead use a file system UUID. Every file system automatically gets a UUID.
 	#blkid /dev/sdc
 	/dev/sdc: UUID="f87DLO-DXDO-jjJ5-3vgO-RfCE-oOCA-VGploa" TYPE="LVM2_member" [make changes according to the output of #lsblk -f
+
 So to ensure that an iSCSI mount is configured persistently, put an entry in /etc/fstab that looks like this:
 	UUID-XXXXXXXX-XXXX-XXXX-XXXXXXXX    /iscsi       ext4     _netdev   0 2
 
