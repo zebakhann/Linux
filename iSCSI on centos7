@@ -1,12 +1,20 @@
-##  How To Configure Iscsi Target And Initiator On Centos/Rhel 7/8 Linux
+##  How To Configure iSCSI Target And Initiator On Centos/Rhel 7/8 Linux
 
 I created this for my revision purpose, so that the next time I perform the same task I won't miss any step.
 I am using a CentOS7 Virtual Machine running on VMware Virtual Machine installed on my Ubuntu base.
 
-iscsi is an acronym for Internet Small Computer System Interface. So basically iSCSI is a block level protocol for sharing RAW storage devices over an IP network. We also call it a SAN technology i.e. iSCSI SAN. Since it operates over IP network, do not mix or confuse it with NAS technologies like NFS or SMB. They also work over IP Network but they operate on File System Layer. but in iSCSI we work on RAW blocks. 
+iscsi is an acronym for Internet Small Computer System Interface. 
+So basically iSCSI is a block level protocol for sharing RAW storage devices over an IP network. We also call it a SAN technology i.e. iSCSI SAN. 
+Since it operates over IP network, do not mix or confuse it with NAS technologies like NFS or SMB. 
+They also work over IP Network but they operate on File System Layer. But in iSCSI we work on RAW blocks. 
 
 iSCSI SAN Architecture :
-When setting up an iSCSI SAN, you configure one server as the iSCSI target. This is the server that offers access to the shared storage devices. When you configure RHEL or CentOS 7 as an iSCSI target, the shared storage devices typically are LVM logical volumes, but they can be complete disks or partitions as well. The other server is going to be used as the iSCSI initiator. This is the server that connects to the SAN. After connecting to the SAN, the iSCSI initiator sees an additional disk device. Now iSCSI initiator goes through the process of discovering targets on the network, authenticating and logging in. Eventually accessing these iSCSI LUNs on localhost.
+When setting up an iSCSI SAN, you configure one server as the iSCSI target. This is the server that offers access to the shared storage devices. 
+When you configure RHEL or CentOS 7 as an iSCSI target, the shared storage devices typically are LVM logical volumes, 
+but they can be complete disks or partitions as well. The other server is going to be used as the iSCSI initiator. 
+This is the server that connects to the SAN. After connecting to the SAN, the iSCSI initiator sees an additional disk device. 
+Now iSCSI initiator goes through the process of discovering targets on the network, authenticating and logging in. 
+Eventually accessing these iSCSI LUNs on localhost.
 
 
 Setup details:
@@ -15,12 +23,16 @@ vCPU - 1 on both initiator and target
 Memory - 1GB on both initiator and target
 Disk - 20GB on target , 10GB on initiator
 Hostname - storage1 on target , node1 on initiator
-FQDN - storage1.example.com on target , node1.example.com
+FQDN - storage1.example.com on target , node1.example.com on initiator
 IP Address - 172.16.207.132 on target , 172.16.207.134 on initiator
 
 Setting Up the iSCSI Target on CentOS7 :
 
-Throughout different versions of Linux, different iSCSI target packages have been used. In Red Hat Enterprise Linux 7 and 8, the LIO (Linux I/O) target is used. LIO is the standard iSCSI target solution since Linux kernels 2.6.38, it has become an attractive storage solution that has rapidly replaced alternative iSCSI target solutions in many Linux distributions. The default interface to manage the LIO target is the targetcli command. This command uses familiar Linux commands, such as cd, ls, pwd, and set to configure the target.
+Throughout different versions of Linux, different iSCSI target packages have been used. 
+In Red Hat Enterprise Linux 7 and 8, the LIO (Linux I/O) target is used. 
+LIO is the standard iSCSI target solution since Linux kernels 2.6.38, it has become an attractive storage solution that has rapidly 
+replaced alternative iSCSI target solutions in many Linux distributions. The default interface to manage the LIO target is the targetcli command. 
+This command uses familiar Linux commands, such as cd, ls, pwd, and set to configure the target.
 
 Steps to setup iSCSI target (VM1) :
 
